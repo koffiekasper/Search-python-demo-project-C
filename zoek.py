@@ -9,8 +9,38 @@ conn = psycopg2.connect(
 
 cur = conn.cursor()
 
-def createQuery(title, categoryList, orderBy):
+def categoryMenu():
+	categoryMenu = {
+	"PlantSize": ["Little", "Medium", "Large"],
+	"Shadow": ["Little", "Medium", "Large"],
+	"Type": ["Flower", "Tree"],
+	"YoungOrOld": ["Old", "Young", "Medium"],
+	"Season": ["all-year", "Winter", "Spring"],
+	"Edible": ["true", "false"],
+	"AmountOfWater": ["Large", "Small"],
+	"Color": ["Green", "Red", "Orange", "Blue", "Pink"]
+	}
 
+
+	i = 0	
+	for key, val in categoryMenu.items():
+		i+=1
+		print(str(i) + ". " + key)
+	menuInput = input("What option?\n\n")
+
+	j = 0
+	for key, val in categoryMenu.items():
+		j += 1
+		if j == int(menuInput):
+			i = 0
+			for cat in categoryMenu[key]:
+				print(str(i) + ". " + cat)
+				i +=1 
+			menuInput = input("What option?\n\n")
+			return (key, categoryMenu[key][int(menuInput)])
+
+
+def createQuery(title, categoryList, orderBy):
 	#Adds order by
 	orderStr=""
 	if orderBy != "":
@@ -20,7 +50,7 @@ def createQuery(title, categoryList, orderBy):
 	titleStr=""
 	if title != "":
 		titleStr='"Plant"."Name" LIKE \'%' + title + '%\''
-		print(titleStr)
+
 
 	#Adds category tuple values to string
 	catStr = ""
@@ -29,9 +59,9 @@ def createQuery(title, categoryList, orderBy):
 		if titleStr != "":
 			catStr += " AND "
 		for cat in categoryList:
-			strList += 'Plant."' + cat[0] + '" LIKE \'' + cat[1] + '\''
+			catStr += '"Plant"."' + cat[0] + '" LIKE \'' + cat[1] + '\''
 			if i != 0 and i != len(categoryList-1):
-				strList += " AND "
+				catStr += " AND "
 			i += 1
 
 	queryStr = "SELECT \"Name\", \"Description\", \"PlantSize\", \"Timestamp\" FROM \"Project C\".\"Plant\" "
@@ -52,9 +82,7 @@ def queryMenu():
 	categoryList = []
 	if input("Add category filter? Y|N:  ") == "Y":	
 		while True:
-			cat = f("category")
-			catType = f("{cat} type")
-			categoryList.append((cat,catType))
+			categoryList.append(categoryMenu())
 			if input("Add another category? Y|N  ") != "Y":
 				break
 	return createQuery(title, categoryList, orderBy)
@@ -65,6 +93,11 @@ while True:
 	menu = input("\n1. Perform search.\n2. Exit\n\nYour option: ")
 	if int(menu) == 1:
 		cur.execute(queryMenu())
-		print(cur.fetchone())
+		resultList = cur.fetchall()
+		print("----Search Results:   ")
+		if len(resultList) == 0:
+			print("No results.")
+		for result in resultList:
+			print(result[0])
 	else:
 		exit()
