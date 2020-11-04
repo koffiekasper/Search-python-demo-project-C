@@ -10,17 +10,16 @@ conn = psycopg2.connect(
 cur = conn.cursor()
 
 def categoryMenu():
+	print("\n----Categories: ")
 	categoryMenu = {
-	"PlantSize": ["Little", "Medium", "Large"],
+	"PlantSize": ["Small", "Medium", "Large"],
 	"Shadow": ["Little", "Medium", "Large"],
 	"Type": ["Flower", "Tree"],
 	"YoungOrOld": ["Old", "Young", "Medium"],
 	"Season": ["all-year", "Winter", "Spring"],
-	"Edible": ["true", "false"],
 	"AmountOfWater": ["Large", "Small"],
 	"Color": ["Green", "Red", "Orange", "Blue", "Pink"]
 	}
-
 
 	i = 0	
 	for key, val in categoryMenu.items():
@@ -32,12 +31,13 @@ def categoryMenu():
 	for key, val in categoryMenu.items():
 		j += 1
 		if j == int(menuInput):
+			print("\n----Options: ")
 			i = 0
 			for cat in categoryMenu[key]:
-				print(str(i) + ". " + cat)
+				print(str(i+1) + ". " + cat)
 				i +=1 
 			menuInput = input("What option?\n\n")
-			return (key, categoryMenu[key][int(menuInput)])
+			return (key, categoryMenu[key][int(menuInput)-1])
 
 
 def createQuery(title, categoryList, orderBy):
@@ -69,22 +69,35 @@ def createQuery(title, categoryList, orderBy):
 	if titleStr or catStr != "":
 		queryStr+= "WHERE " + titleStr + catStr	 
 
+
 	#add ASC or DESC options
 	if orderBy != "":
-		queryStr += " ORDER BY {orderBy}"
+		queryStr += " ORDER BY \"" + orderBy + "\""
 
 	return queryStr
 
 def queryMenu():
+	orderList = ["Name", "Timestamp"]
 	f = lambda x : input("[No input to continue] Please enter " + x + ": ")
 	title = f("title")
-	orderBy = f("ORDER BY")
+
+
+
 	categoryList = []
 	if input("Add category filter? Y|N:  ") == "Y":	
 		while True:
 			categoryList.append(categoryMenu())
 			if input("Add another category? Y|N  ") != "Y":
 				break
+
+	if input("Order the search results? Y|N  ") == "Y":
+		print()
+		i=0
+		for option in orderList:
+			i+=1
+			print(str(i) + " - " + option)
+		orderBy = orderList[int(input("Your option: "))-1]
+	print("\n\n")
 	return createQuery(title, categoryList, orderBy)
 
 print("Welcome\n\n")
@@ -92,6 +105,7 @@ time.sleep(1)
 while True:
 	menu = input("\n1. Perform search.\n2. Exit\n\nYour option: ")
 	if int(menu) == 1:
+		print()
 		cur.execute(queryMenu())
 		resultList = cur.fetchall()
 		print("----Search Results:   ")
