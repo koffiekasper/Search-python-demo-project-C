@@ -40,11 +40,11 @@ def categoryMenu():
 			return (key, categoryMenu[key][int(menuInput)-1])
 
 
-def createQuery(title, categoryList, orderBy):
+def createQuery(title, categoryList, orderByV):
 	#Adds order by
 	orderStr=""
-	if orderBy != "":
-		orderStr = "ORDER BY {orderBy}"
+	if orderByV != "":
+		orderStr = "ORDER BY {orderByV}"
 
 	#Adds title to query	
 	titleStr=""
@@ -71,8 +71,8 @@ def createQuery(title, categoryList, orderBy):
 
 
 	#add ASC or DESC options
-	if orderBy != "":
-		queryStr += " ORDER BY \"" + orderBy + "\""
+	if orderByV != "":
+		queryStr += " ORDER BY \"" + orderByV + "\""
 
 	return queryStr
 
@@ -89,7 +89,7 @@ def queryMenu():
 			categoryList.append(categoryMenu())
 			if input("Add another category? Y|N  ") != "Y":
 				break
-
+	orderBy = ""
 	if input("Order the search results? Y|N  ") == "Y":
 		print()
 		i=0
